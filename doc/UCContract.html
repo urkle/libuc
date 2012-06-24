@@ -1,0 +1,309 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010,2012.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+
+<html>
+<head>
+<title>class UCContract</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>class UCContract</h1>
+<h2 class="include">#include "uccontract.h"</h2>
+
+<h2>Overview</h2>
+
+<p>UCContract provides a means to evaluate a given UniversalContainer object
+against an arbitrary contract, and determining if it matches that contract. The
+primary intent is to provide an easy means of checking incoming JSON objects
+to ensure they are formatted as expected, but it can also be used to verify
+objects on deserialization, post requests, or as a means of checking other input.</p>
+
+<h2>Describing a Contract</h2>
+<p>Instances of UCContract are created from UniversalContainers
+describing the contract. Contract descriptors are maps which contain
+the key "type". This key must map to a string designating the type of
+UniversalContainer the contract describes. Other members of the contract description
+are optional, and dependent on the type. If present, these members
+restrict the range of possible values that the given element may take on.</p>
+
+<p><table class="dictionary">
+  <tr>
+    <th>Type / <br/> Constraint</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td>boolean</td>
+    <td>Contract matches a UC holding a boolean value.<td>
+  </tr>
+  <tr>
+    <td>character</td>
+    <td>Contract matches a UC holding a character.<td>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>Contract matches a UC holding a string.<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;regex</td>
+    <td>A regular expression the string must match. Uses regexec from
+  the standard C library.<td>
+  </tr>
+  <tr>
+    <td>integer</td>
+    <td>Contract matches a UC holding a character.<td>
+  </tr>  
+  <tr>
+    <td>&nbsp;&nbsp;lower_bound</td>
+    <td>The smallest integer value that the UC may take on.<td>
+  </tr>
+    <tr>
+    <td>&nbsp;&nbsp;upper_bound</td>
+    <td>The largest integer value that the UC may take on.<td>
+  </tr>
+  <tr>
+    <td>real</td>
+    <td>Contract matches a UC holding a real (float/double).<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;lower_bound</td>
+    <td>The smallest real value that the UC may take on.<td>
+  </tr>
+    <tr>
+    <td>&nbsp;&nbsp;upper_bound</td>
+    <td>The largest real value that the UC may take on.<td>
+  </tr>
+  <tr>
+    <td>map</td>
+    <td>Contract matches a UC holding a map.<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;required_members</td>
+    <td>Must map to another map. Each member of this map is a map
+  between a string and another map specifying a contact. The map being
+  checked must contain each of the specified keys, and each key must
+  conform to the contract given for that key.<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;optional_members</td>
+    <td>Must map to another map. Each member of this map is a map
+  between a string and another map specifying a contact. The map being
+  checked must may contain of the specified keys, and each key must
+  conform to the contract given for that key if it appears. It is not
+  a violation of the contract if some optional member does not appear.<td>
+  </tr>
+  <tr>
+    <td>array</td>
+    <td>Contract matches a UC holding an array.<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;size</td>
+    <td>Specifies a contract of type integer. The size of the array
+  must match the bounds given in the contract.<td>
+  </tr>
+  <tr>
+    <td>&nbsp;&nbsp;forall</td>
+    <td>Specifies a contract which every member of the array must satisfy.<td>
+  </tr>
+  <tr>
+  <tr>
+    <td>&nbsp;&nbsp;exists</td>
+    <td>Specifies an array of contracts. For each element of this
+  array, the matched container must contain an element matching the
+  given contract. Note that an element may match multiple entries in
+  the exists array.<td>
+  </tr>
+</table></p>
+
+<p>When a contract is created any required regex is compiled and saved
+for later use. Otherwise, creating a new instance of UCContract is not
+terribly expensive. However, in most cases it will involved
+deserializing the UniversalContainer describing the contract; most
+likely from some JSON source. This can be expensive, especially if it
+involves an I/O operation. Therefore, it is recommend that instance
+of UCContract we initialized once and then retained in some globally
+accessible store for later comparisons.</p>
+
+<h2>Example</h2>
+
+<p>Below is an example of a contract description in JSON, showing how
+to use the various elements. To use a contract like this, you would
+first deserialize the JSON to a UniversalContainer using
+uc_decode_json, and then pass the resulting UC to the constructor for
+a UCContract object.</p>
+
+<pre>
+{
+    "type" : "map",
+    "required_members" : {
+	"name" : {
+	    "type" : "string",
+	    "regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+	},
+	"age" : {
+	    "type" : "integer",
+	    "lower_bound" : 18
+	},
+	"manager" : { 
+	    "type" : "boolean"
+	},
+	"sex" : {
+	    "type" : "character"
+	},
+	"email" : {
+	    "type" : "string",
+	    "regex" : "[a-z]*@[a-z]*\\.[a-z]*"
+	}
+    },
+    "optional_members" : {
+	"dependents" : {
+	    "type" : "array",
+	    "size" : {
+		"type" : "integer"
+		"upper_bound" : 8
+	    },
+	    "forall" : {
+		"type" : "map",
+		"required_members" : {
+		    "name" : {
+			"type" : "string",
+			"regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+		    },
+		    "age" : {
+			"type" : "integer",
+			"lower_bound" : 0,
+			"upper_bound" : 17
+		    }
+		}
+	    },
+	    "exists" : [{
+		"type" : "map",
+		"required_members" : {
+		    "name" : {
+			"type" : "string",
+			"regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+		    },
+		    "age" : {
+			"type" : "integer",
+			"lower_bound" : 5,
+			"upper_bound" : 5
+		    }
+		}
+	    }]
+	},
+	"salary" : {
+	    "type" : "real",
+	    "lower_bound" : 25000.0,
+	    "upper_bound" : 250000.0
+	}
+    }
+}
+</pre>
+
+<p>Below is an example of some data that this contract matches without
+errors; again given in JSON format.</p>
+
+<pre>
+{
+    "name" : "John Smith",
+    "age" : 35,
+    "email" : "john@test.com",
+    "dependents" : [
+	{
+	    "name" : "Jr Smith",
+	    "age" : 10
+	},
+	{
+	    "name" : "Sue Smith",
+	    "age" : 7
+	},
+	{
+	    "name" : "Sally Smith",
+	    "age" : 17
+	}			
+    ],
+    "sex" : "M",
+    "manager" : false
+}
+</pre>
+
+<h2>Constructor</h2>
+<div class="method_div">
+<h3 class="method">UCContract(UniversalContainer& uc)</h3>
+<p>Creates a new UCContract object from the description provided by
+  the UniversalContainer uc. See explanation above.</p>
+</div>
+
+<h2>Methods</h2>
+<div class="method_div">
+<h3 class="method"> unsigned compare(const UniversalContainer& uc)
+  const</h3>
+  <p>Compares the container uc against the contract, and returns 0 if
+  uc matches the contract. A non-zero return value indicates one or
+  more violations of the contract; depending on which bits of the
+  return code are set. Note that in the case of arrays and maps, there
+  is no indication of which element caused a particular flag to be
+  set, and there may be multiple violations of the same type.</p>
+
+  <table class="dictionary">
+    <tr>
+      <td>ucc_IMPROPER_TYPE</td>
+      <td>The container or one or more of its elements has the wrong data type.</td>
+    </tr>
+    <tr>
+      <td>ucc_CONSTRAINT_VIOLATION</td>
+      <td>The value of the container violates the constraints
+	specified in the contract. This is also the flag that signals
+    an array that has violated its size constraints, or for which some
+    element has violated that forall constraint.
+      </td>
+    </tr>
+    <tr>
+      <td>ucc_EXTRA_MAP_ELEMENT</td>
+      <td>A map contains one or more elements that are not specified in as required or optional.</td>
+    </tr>
+    <tr>
+      <td>ucc_MISSING_REQUIRED_MAP_ELEMENT</td>
+      <td>A map is missing an element that is marked as required.</td>
+    </tr>
+    <tr>
+      <td>ucc_MISSING_REQUIRED_ARRAY_ELEMENT</td>
+      <td>An array does not contain an element that is specified in
+    the exists constraint.</td>
+    </tr>
+    <tr>
+      <td>ucc_STRING_DOES_NOT_MATCH</td>
+      <td>Some string does not match the given regex expression.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="method_div">
+<h3 class="method">void compare_and_throw(UniversalContainer&, unsigned = 0XFFFFFFFF) const</h3>
+  <p>This method calls compare on the given container, and performs an
+  or operation between the mask and the result of the compare
+  operation. If the final result is non-zero then a UniversalContainer
+  is thrown as an <a
+  href="UniversalContainer.html#exceptions">exception</a>. The
+  resulting exception has the code key set to
+  uce_ContractViolation, and the key compare_result set to the value
+  of the compare operation ored with the mask. The key violations
+  maps to an array of strings containing the same messages produced by
+  the error_messages method.</p>
+  </div>
+
+<div class="method_div">
+<h3 class="method">static std::vector<const char*> error_messages(unsigned result)</h3>
+  <p>When passed a result code, this method will return a vector of
+  error messages in English matching the flags sets in the
+  result. This is a utility method to make debugging easier.</p>
+  </div>
+  
+</body>
+</html>

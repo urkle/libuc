@@ -1,0 +1,65 @@
+{
+    "type" : "map",
+    "required_members" : {
+	"name" : {
+	    "type" : "string",
+	    "regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+	},
+	"age" : {
+	    "type" : "integer",
+	    "lower_bound" : 18
+	},
+	"manager" : { 
+	    "type" : "boolean"
+	},
+	"sex" : {
+	    "type" : "character"
+	},
+	"email" : {
+	    "type" : "string",
+	    "regex" : "[a-z]*@[a-z]*\\.[a-z]*"
+	}
+    },
+    "optional_members" : {
+	"dependants" : {
+	    "type" : "array",
+	    "size" : {
+		"type" : "integer"
+		"upper_bound" : 8
+	    },
+	    "forall" : {
+		"type" : "map",
+		"required_members" : {
+		    "name" : {
+			"type" : "string",
+			"regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+		    },
+		    "age" : {
+			"type" : "integer",
+			"lower_bound" : 0,
+			"upper_bound" : 17
+		    }
+		}
+	    },
+	    "exists" : [{
+		"type" : "map",
+		"required_members" : {
+		    "name" : {
+			"type" : "string",
+			"regex" : "[A-Z][a-z]*\\ [A-Z][a-z]"
+		    },
+		    "age" : {
+			"type" : "integer",
+			"lower_bound" : 5,
+			"upper_bound" : 5
+		    }
+		}
+	    }]
+	},
+	"salary" : {
+	    "type" : "real",
+	    "lower_bound" : 25000.0,
+	    "upper_bound" : 250000.0
+	}
+    }
+}

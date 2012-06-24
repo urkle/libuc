@@ -1,0 +1,11 @@
+This is the libuc library, by Jason Denton. This library provides the
+UniversalContainer class, which is a C++ class that attempts to mimic
+the general purpose dictionaries of many popular scripting languages.
+Included are variety of routines for REST style web programming, and
+for database manipulation. This library is covered by the new BSD
+license, see the LICENSE file for details. To build the library, run
+the configure script then make. The file doc/index.html is the
+starting point for the documentation.
+
+Jason Denton
+February, 2010

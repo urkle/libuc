@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>Libuc generic utility routines</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>LibUC</h1>
+
+<h2>Overview</h2>
+<p>The uc library provides a number of generic utility routines useful in C++ programs.</p>
+
+<h2>Template Functions</h2>
+<h2 class="include">#include "stl_util.h"</h2>
+
+<div class="method_div">
+<h3 class="method">std::vector keys_for_map(const std&amp; map)</h3>
+<p>This function template returns a vector containing all the keys for the given map.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">std::vector values_in_map(const std&amp; map)</h3>
+<p>This function template returns a vector containing all the values stored in a map.</p>
+</div>
+
+<h3 class="method">std::vector vector_sublist(const std::vector&amp; list, int start, int length)</h3>
+<p>This template function returns a sublist of the given vector, starting at the given index and running for length elements.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool compare_map(std::map&amp; map1, std::map&amp; map2)</h3>
+  <p>Compares two maps, and returns true if the value associated with every key in the first map appears in the second map and the value associated with that key is the same (operator==) in both maps.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool compare_vector(std::vector&amp; list1, std::vector&amp; list2)</h3>
+  <p>Compares two vectors, and return true if the contain identical elements in identical order.</p>
+</div>
+
+<h2>String Functions</h2>
+<h2 class="include">#include "string_util.h"</h2>
+
+<div class="method_div">
+<h3 class="method">std::string string_chomp(const std::string& str)</h3>
+
+  <p>Returns a new string, which is identical to the provided string
+  except that whitespace (spaces, tabs, and newlines) are removed from
+  both the front and end of the string.</p>
+  
+</div>
+
+<div class="method_div">
+<h3 class="method">std::vector&lt;std::string&gt; string_pieces(const std::string& str,const std::string& delim)</h3>
+
+  <p>Breaks the string str into tokens and returns the results. The
+  delim parameter is interpreted as a string, so that all characters
+  must be present and in order before a delimiter is considered to
+  have been found.</p>
+  
+</div>
+
+<div class="method_div">
+<h3 class="method">std::vector&lt;std::string&gt; string_tokens(const std::string& str,const std::string& delim)</h3>
+
+  <p>Breaks the string str into tokens and returns the results. The
+  delim parameter is interpreted as a series of single character
+  delimiters.</p>
+  
+</div>
+
+<div class="method_div">
+<h3 class="method">std::vector&lt;std::string&gt; string_split(const std::string& str,const std::string& delim)</h3>
+
+  <p>Breaks the string str into two parts and returns the results. The delim parameter is interpreted as a series of single character delimiters.</p>
+
+</div>
+</body>
+</html>

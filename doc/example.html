@@ -1,0 +1,126 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>C++ code colored by C++2HTML</title>
+<meta name="generator" content="C++2HTML by Jasper Bedaux">
+<!-- To generate your own colored code visit http://www.bedaux.net/cpp2html/ -->
+<style type="text/css">
+.comment { color: #999999; font-style: italic; }
+.pre { color: #000099; }
+.string { color: #009900; }
+.char { color: #009900; }
+.float { color: #996600; }
+.int { color: #999900; }
+.bool { color: #000000; font-weight: bold; }
+.type { color: #FF6633; }
+.flow { color: #FF0000; }
+.keyword { color: #990000; }
+.operator { color: #663300; font-weight: bold; }
+</style>
+</head><body>
+<pre><span class="comment">/*
+ * UniversalContainer library.
+ * Copyright Jason Denton, 2008,2010.
+ * Made available under the new BSD license, as described in LICENSE
+ *
+ * Send comments and bug reports to jason.denton@gmail.com
+ * http://www.greatpanic.com/code.html
+ */</span><span class="pre">
+
+#include &lt;iostream&gt;
+</span><span class="comment">
+//The header univcont.h includes all the different pieces of the libuc library.
+</span><span class="pre">#include "univcont.h"
+</span><span class="keyword">
+using namespace</span> std<span class="operator">;</span><span class="comment">
+
+//UniversalContainer and friends are in the JAD namespace
+</span><span class="keyword">using namespace</span> JAD<span class="operator">;</span><span class="type">
+
+void</span> print_person<span class="operator">(</span>UniversalContainer<span class="operator">&amp;</span> uc<span class="operator">)
+{</span>
+  string name<span class="operator"> =</span> uc<span class="operator">[</span><span class="string">"name"</span><span class="operator">];</span>
+  string age<span class="operator"> =</span> uc<span class="operator">[</span><span class="string">"age"</span><span class="operator">];</span><span class="type">
+  char</span> sex<span class="operator"> =</span> uc<span class="operator">[</span><span class="string">"sex"</span><span class="operator">];</span>
+  
+  cout<span class="operator"> &lt;&lt;</span> name<span class="operator"> &lt;&lt;</span><span class="char"> '\t'</span><span class="operator"> &lt;&lt;</span> sex<span class="operator"> &lt;&lt;</span><span class="char"> '\t'</span><span class="operator"> &lt;&lt;</span> age<span class="operator"> &lt;&lt;</span> endl<span class="operator">;
+}</span><span class="comment">
+
+/*
+  A simple example that declares a record holding the personal records
+  of a solider and his family.
+ */</span><span class="type">
+int</span><span class="keyword"> main</span><span class="operator">(</span><span class="type">int</span> argc<span class="operator">,</span><span class="type"> char</span><span class="operator">**</span> argv<span class="operator">)
+{</span><span class="flow">
+  
+  try</span><span class="operator"> {</span>
+    UniversalContainer solider<span class="operator">;</span><span class="comment">
+    
+    //Note all the different types of primitives that can be assigned to
+    //arbitrary keys.
+</span>    solider<span class="operator">[</span><span class="string">"name"</span><span class="operator">] =</span><span class="string"> "Kansas Smith"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"age"</span><span class="operator">] =</span><span class="int"> 23</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"officer"</span><span class="operator">] =</span><span class="bool"> false</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"serial"</span><span class="operator">] =</span><span class="int"> 789456</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"sex"</span><span class="operator">] =</span><span class="string"> "M"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"wage"</span><span class="operator">] =</span><span class="float"> 25.75</span><span class="operator">;</span><span class="comment">
+    
+    //We can easily nest UniversalContainers
+</span>    solider<span class="operator">[</span><span class="string">"spouse"</span><span class="operator">][</span><span class="string">"name"</span><span class="operator">] =</span><span class="string"> "Sue Smith"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"spouse"</span><span class="operator">][</span><span class="string">"sex"</span><span class="operator">] =</span><span class="string"> "F"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"spouse"</span><span class="operator">][</span><span class="string">"age"</span><span class="operator">] =</span><span class="string"> "Won't Say"</span><span class="operator">;</span><span class="comment">
+    
+    //Or have a container act as an array.
+    //In this case, the key "dependants" maps to a UniversalContainer that is an array of
+    //other UniversalContainers, which in turn have their own keys.
+</span>    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">0</span><span class="operator">][</span><span class="string">"name"</span><span class="operator">] =</span><span class="string"> "Joe Smith"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">0</span><span class="operator">][</span><span class="string">"age"</span><span class="operator">] =</span><span class="int"> 3</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">0</span><span class="operator">][</span><span class="string">"sex"</span><span class="operator">] =</span><span class="string"> "M"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">1</span><span class="operator">][</span><span class="string">"name"</span><span class="operator">] =</span><span class="string"> "Ann Smith"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">1</span><span class="operator">][</span><span class="string">"age"</span><span class="operator">] =</span><span class="int"> 1</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">1</span><span class="operator">][</span><span class="string">"sex"</span><span class="operator">] =</span><span class="string"> "F"</span><span class="operator">;</span>
+    solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span><span class="int">2</span><span class="operator">][</span><span class="string">"name"</span><span class="operator">] =</span><span class="string"> "On the way"</span><span class="operator">;</span>
+    
+    cout<span class="operator"> &lt;&lt;</span><span class="string"> "NAME"</span><span class="operator"> &lt;&lt;</span><span class="string"> "\t\t"</span><span class="operator"> &lt;&lt;</span><span class="string"> "SEX"</span><span class="operator"> &lt;&lt;</span><span class="string"> "\t"</span><span class="operator"> &lt;&lt;</span><span class="string"> "AGE"</span><span class="operator"> &lt;&lt;</span> endl<span class="operator">;</span>
+    print_person<span class="operator">(</span>solider<span class="operator">);</span><span class="comment">
+    
+    //A UC can be a map between strings and other UCs.
+</span>    print_person<span class="operator">(</span>solider<span class="operator">[</span><span class="string">"spouse"</span><span class="operator">]);</span><span class="comment">
+    
+    //We can loop through the array of dependants
+</span><span class="flow">    for</span><span class="operator"> (</span><span class="type">unsigned</span> i<span class="operator"> =</span><span class="int"> 0</span><span class="operator">;</span> i<span class="operator"> &lt;</span> solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">].</span>size<span class="operator">();</span> i<span class="operator">++)</span>
+      print_person<span class="operator">(</span>solider<span class="operator">[</span><span class="string">"dependants"</span><span class="operator">][</span>i<span class="operator">]);</span><span class="comment">
+    
+    //Here is an example of using dot notation to get at nested elements
+</span>    cout<span class="operator"> &lt;&lt;</span><span class="string"> "The litte girls name is "</span><span class="operator"> &lt;&lt; 
+      (</span>string<span class="operator">)</span>solider<span class="operator">[</span><span class="string">"dependants.1.name"</span><span class="operator">] &lt;&lt;</span> endl<span class="operator">;</span><span class="comment">
+    
+    //Here we show how a container may be cast as the type it is holding
+</span><span class="type">    double</span> combat_pay<span class="operator"> = (</span><span class="type">double</span><span class="operator">)</span>solider<span class="operator">[</span><span class="string">"wage"</span><span class="operator">] +</span><span class="float"> 5.35</span><span class="operator">;</span>
+    cout<span class="operator"> &lt;&lt;</span><span class="string"> "Combat pay is "</span><span class="operator"> &lt;&lt;</span> combat_pay<span class="operator"> &lt;&lt;</span> endl<span class="operator">;</span><span class="comment">
+    
+    //This is essential what the print statement does,
+    //we show it here as an example of using the serializer code.
+</span>    Buffer<span class="operator">*</span> buf<span class="operator"> =</span> uc_encode_ini<span class="operator">(</span>solider<span class="operator">);</span>
+    write_from_buffer<span class="operator">(</span>buf<span class="operator">,</span>stdout<span class="operator">);</span><span class="keyword">
+    delete</span> buf<span class="operator">;
+   
+  }</span><span class="comment">
+  //We shouldn't ever be here, but if we are, the exception will contain
+  //key/value pairs describing what went wrong.
+</span><span class="flow">  catch</span><span class="operator">(</span>UniversalContainer uce<span class="operator">) {</span>
+    cout<span class="operator"> &lt;&lt;</span><span class="string"> "An exception was thrown."</span><span class="operator"> &lt;&lt;</span> endl<span class="operator">;</span>
+    print<span class="operator">(</span>uce<span class="operator">);
+  }
+}</span>
+</pre>
+</body></html>

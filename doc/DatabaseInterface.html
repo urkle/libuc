@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>DatabaseInterface</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>class DatabaseInterface</h1>
+<h2 class="include">#include "ucdb.h"</h2>
+
+<h2>Overview</h2>
+
+<p>The abstract DatabaseInterface class provides a unified interface to
+different SQL type database implementations. Client code can obtain a
+pointer to a DatabaseInterface, and use it to execute SQL statements,
+without having to worry about the underlying implementation.</p>
+
+<h2>Virtual Methods</h2>
+<div class="method_div">
+<h3 class="method">sql_exec(std::string query)</h3>
+
+  <p>Executes an sql_query, and returns the results in a
+UniversalContainer. Successful SQL queries that return sets of rows,
+such as a select statements will return an array type
+container. Members of this array will be map type containers, whose
+members correspond to the columns of the SQL statement. SQL statements
+that do not return sets of rows, or which fail, will return a map with
+the members <tt>status_code</tt> and <tt>message</tt>. If the
+operation was successful the <tt>#boolean_value</tt> meta-data key
+will be set to true ensuring that a boolean evaluation of container
+will be true.  <tt>status_code</tt> will be zero and <tt>message</tt>
+will be "success". If the sql operations failed,
+<tt>#boolean_value</tt> will be false so that a boolean evaluation of
+the container will be false, and <tt>status_code</tt> and
+<tt>message</tt> will be set to the error code and corresponding
+message defined by the underlying implementation.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">start_transaction(void)</h3>
+  <p>Starts a new transaction on the database. Returns true on success
+  and false on failure. The DatabaseInterface base class provides a
+  default implementation that simply executes the relevant
+  sql. Implementations that do not need to provide additional
+  semantics may inherit this implementation.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">commit(void)</h3>
+  <p>Commits a transaction on the database. Returns true on success
+  and false on failure. The DatabaseInterface base class provides a
+  default implementation that simply executes the relevant
+  sql. Implementations that do not need to provide additional
+  semantics may inherit this implementation.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">rollback(void)</h3>
+  <p>Rolls back a transaction on the database. Returns true on success
+  and false on failure. The DatabaseInterface base class provides a
+  default implementation that simply executes the relevant
+  sql. Implementations that do not need to provide additional
+  semantics may inherit this implementation.</p>
+</div>
+					
+<div class="method_div">
+<h3 class="method">UniversalContainer get_db_info(void)</h3>
+  <p>This method returns a map type UniversalContainer that describes
+  the underlying implementation and the details of the database. The
+  only key guaranteed to be present in this map is
+  <tt>database_type</tt>, which is a string identifying the underlying
+  implementation. In general, the other key value pairs in the map
+  will describe information that the underlying implementation needs
+  to connect to the database.</p>
+</div>
+  
+<a name="implementations">
+<h1>Specific Implementations</h1>
+
+<h1>class SQLiteDatabase</h1>
+<h2 class="include">#include "ucsqlite.h"</h2>
+
+<h2>Overview</h2>
+
+<p>The SQLiteDatabase class implements the DatabaseInterface class for
+SQLite3 databases. SQLite provides a simple, in process, file based SQL
+implementation.
+
+<h2>Constructors</h2>
+<div class="method_div">
+<h3 class="method">SQLiteDatabase(std::string filename)</h3>
+<h3 class="method">SQLiteDatabase(char* filename)</h3>
+<p>These methods construct a new SQLiteDatabase instance based on the
+  provided filename. If there an error occurs opening the file an
+  exception of type UniversalContainer is thrown, with the key
+  <tt>code</tt> set to uce_DB_Connection. When objects created with
+  these constructors go out of scope, the sqlite connection is cleaned
+  up.</p> 
+</div>
+
+<div class="method_div">
+<h3 class="method">SQLiteDatabase(sqlite3* db)</h3>
+<p>This constructor creates a new instance based on an existing
+  sqlite3 handle. Unlike the other constructors, the resulting objects do
+  not own the underlying database handle and so when these objects go
+  out of scope they do not clean up the connection.</p>
+</div>
+
+<h2>Implementation Specific Methods</h2>
+
+<div class="method_div">
+<h3 class="method">sqlite3* get_db_handle(void)</h3>
+<p>This method returns the underlying database connection used by the
+  object. This allows for connection parameters to be adjusted and
+  other routines in the databases native library used with the class.</p>
+</div>
+
+<h1>MySQLDatabase</h1>
+<h2 class="include">#include "ucmysql.h"</h2>
+
+<h2>Overview</h2>
+
+<p>This class provides an implementation of DatabaseInterface the
+connects to an underlying mysql database.</p>
+
+<h2>Constructors</h2>
+<div class="method_div">
+<h3 class="method">MySQLDatabase(const char* hostname = NULL,
+  const char* username = NULL,
+  const char* password = NULL,
+  const char* = db_name,
+  unsigned port = 0,
+  const char* socket = NULL,
+  unsigned flags = 0)</h3>
+<h3 class="method"> MySQLDatabase(UniversalContainer)</h3>
+  
+  <p>The first constructor creates a new instance of MySQLDatabase by
+  passing the provided parameters to the mysql function
+  mysql_real_connection. The second constructor users examines the
+  provided UniversalContainer for keys matching the parameters names
+  of the first constructor, and uses those values to call
+  mysql_real_setup when creating the database instance. The container
+  is then cloned to provide the basis for the information returned
+  from future get_db_info calls. When objects created with these
+  constructors go out of scope, the sqlite connection is cleaned
+  up.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method"> MySQLDatabase(MYSQL* db)</div>
+<p>This constructor creates a new instance based on an existing
+  mysql handle. Unlike the other constructors, the resulting objects do
+  not own the underlying database handle and so when these objects go
+  out of scope they do not clean up the connection.</p>
+</div>
+
+<h2>Implementation Specific Methods</h2>
+
+<div class="method_div">
+<h3 class="method"> MYSQL* get_db_handle(void)</h3>
+<p>This method returns the underlying database connection used by the
+  object. This allows for connection parameters to be adjusted and
+  other routines in the databases native library used with the class.</p>
+</div>
+
+
+</body>
+</html>

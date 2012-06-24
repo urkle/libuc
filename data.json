@@ -1,0 +1,21 @@
+{
+    "name" : "John Smith",
+    "age" : 35,
+    "email" : "john@test.com",
+    "dependants" : [
+	{
+	    "name" : "Jr Smith",
+	    "age" : 10
+	},
+	{
+	    "name" : "Sue Smith",
+	    "age" : 7
+	},
+	{
+	    "name" : "Sally Smith",
+	    "age" : 17
+	}			
+    ],
+    "sex" : "M",
+    "manager" : FALSE
+}

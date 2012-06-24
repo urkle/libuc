@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>UniversalContainer I/O</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>UniversalContainer Input/Output Routines</h1>
+<h2 class="include">#include "ucio.h"</h2>
+
+<h2>Overview</h2>
+
+<p>These routines allow for entire UniversalContainers to be read and
+written in various ways. All of the functions presented here are
+either serializers or deserializers, or convenience functions that wrap
+such functions.</p>
+
+<h2>Meta-data Convention</h2>
+<p>When serializing map type containers the various serializers ignore
+keys that begin with the # symbol. This includes the #boolean_value
+key used to set the true/false value of a map type container. This
+allows various type of meta-data to be easily added to a container,
+without changing the serialized form of that data.</p>
+
+<h2>Serialization Routines</h2>
+
+<div class="method_div">
+<h3 class="method">Buffer* uc_encode_ini(const UniversalContainer&
+  uc)</h3>
+<h3 class="method">UniversalContainer uc_decode_ini(Buffer*)</h3>
+  <p>The uc_encode_ini and uc_decode_ini functions convert a
+  UniversalContainer to an ini format and decode that format back
+  to a UniversalContainer. Map type containers are converted to a list
+  of key/value pairs. The keys and values are separated by an equal
+  sign, pairs are separated by a newline character. Arrays use a similar
+  format with the integer indices replacing the keys. Nested
+  containers are represented with a dot notation. Lines that being
+  with a # symbol are ignored by uc_decode_ini. This format does not
+  preserve the type information, it uses
+  UniversalContainer::string_interpret to convert values to UniversalContainers.</p>
+</div>
+  
+<div class="method_div">
+<h3 class="method">UniversalContainer uc_decode_form(Buffer*)</h3>
+<h3 class="method">Buffer* uc_encode_form(const UniversalContainer&
+  uc)</h3>
+  
+  <p>This pair of routines encodes and decodes UniversalContainers in
+  the application/x-www-form-urlencoded format used by browsers
+  submitting forms to web servers via the HTTP POST method. This format does not
+  preserve the type information, it uses
+  UniversalContainer::string_interpret to convert values to UniversalContainers.</p>
+  </div>
+  
+<div class="method_div">
+<h3 class="method">UniversalContainer uc_decode_binary(Buffer*) </h3>
+<h3 class="method">Buffer* uc_encode_binary(const UniversalContainer&)</h3>
+   <p>These routines implement a binary serializer and
+  deserializer. This form is compact and efficient, and preserves the
+  type of each component container.</p>
+  </div>
+ 
+<div class="method_div">
+<h3 class="method">UniversalContainer uc_decode_json(Buffer*)</h3>
+<h3 class="method">Buffer* uc_encode_json(const UniversalContainer&)</h3>
+   <p>The functions uc_decode_json and uc_encode_json implement
+  Javascript object notation serialization and deserilaization. This format does not
+  preserve the type information, it uses
+  UniversalContainer::string_interpret to convert values to UniversalContainers.</p>
+</div>
+ 
+<h2>Convenience Routines</h2>
+
+<div class="method_div">
+<h3 class="method">void print(UniversalContainer&)</h3>
+
+<p>Prints a UniversalContainer to stdout. This routine uses
+uc_encode_ini to serialize the container, and so any map keys starting
+with the # symbol are not displayed.</p>
+</div>
+
+ 
+<div class="method_div">
+<h3 class="method">UniversalContainer load_ini_file(const char* filename)</h3>
+<p>This function reads a file in ini format, and returns a
+  UniversalContainer
+  containing the contents.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool write_ini_file(const char* filename, UniversalContainer& uc)</h3>
+<p>This function writes out a UniversalContainer to the given file,
+using ini format.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">UniversalContainer uc_from_json_file(const char* fname)</h3>
+<p>This function reads a file containing a JSON object and returns the
+  corresponding UniversalContainer.</p>
+</div>
+</body>
+</html>

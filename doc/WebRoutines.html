@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>Libuc web utility routines</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>LibUC</h1>
+
+<h2 class="include">#include "uc_web.h"</h2>
+
+<p>LibUC provides set of routines for web and REST based
+programming. These include routines for basic cgi programming and for
+posting and retrieving UniversalContainers to and from web
+services.</p>
+
+<p>The web_rpc_call and web_rpc_return functions are intended to work
+with the init_cgi to provide a complete, easy to use, remote call
+mechanism. The intended use pattern begins with the client, which
+creates a UniversalContainer containing the variables of the
+request. It uses this request object to call web_rpc_call. The server
+receives this request by calling init_cgi. The server can then check
+the "post" key to retrieve the request object. Once the server has
+constructed a response object it uses that object to call
+web_rpc_return. The client then receives this response as the return
+value of the initial web_rpc_call.</p>
+
+<h2>CGI Functions</h2>
+
+<div class="method_div">
+<h3 class="method">UniversalContainer init_cgi(void)</h3>
+
+  <p><strong>Note: This method must be called before the cgi program
+reads any input from stdin.</strong> This function returns a
+dictionary describing the input and environment of a cgi program. It
+attempts to parse get and post variables into UniversalContainers if
+possible. It understands both traditional HTTP form posts, and data
+sent in json format. The table below describes the entries in the
+dictionary.
+
+  <table class="dictionary">
+    <tr><th>Key</th><th>Value</th></tr>
+    <tr><td>get</td><td>If get variables where sent to the cgi script,
+    this value holds a dictionary of those variables, and will
+    evaluate to true in a boolean cast. Otherwise it
+    evaluates to false.</td></tr>
+    
+    <tr><td>post</td><td>If post variables where sent to the cgi script,
+    this value holds a dictionary of those variables, and will
+    evaluate to true in a boolean cast. Otherwise it
+    evaluates to false. init_cgi understands both
+    <i>application/x-www-form-urlencoded</i> and <i>application/json</i> formats
+    for post data.</td></tr>
+  
+    <tr><td>cookies</td><td>If cookies where sent to the cgi script,
+    this value holds a dictionary of those variables, and will
+    evaluate to true in a boolean cast. Otherwise it
+    evaluates to false.</td></tr>
+
+    <tr><td>env</td><td>Contains a dictionary of the environmental
+      variables passed to the cgi program.</td></tr>
+      
+      <tr><td>stdin_available</td><td>Boolean that indicates whether or
+    not the stdin stream was consumed by init_cgi. Generally, this
+    will be false when post data was read, and false when it was not
+    available or in a format not understood by init_cgi.</td></tr>
+    </table>
+</div>
+
+<h2>Web RPC Functions</h2>
+
+<div class="method_div">
+<h3 class="method">UniversalContainer web_rpc_call(const char* url, 
+				  UniversalContainer& request,
+				  const char* mime_type)</h3>
+
+  <p><em class="warning">This method requires that LibUC be built with
+  libcurl support.</em></p>
+  
+  <p>This method formats the provided request object according to the
+  provided mime_type, and then does an HTTP post of this formatted
+  data to the given url. The response from the server is interpreted
+  based on the returning mime type, and parsed to produce the
+  UniversalContainer which is returned. The understood types are
+  <i>application/x-www-form-urlencoded</i> and <i>application/json</i>, and if
+  mime_type is NULL, mime_type will default to
+  <i>application/x-www-form-urlencoded</i>.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">void web_rpc_return(UniversalContainer& uc, const
+  char* mime_type)</h3>
+
+  <p>This method formats the passed UniversalContainer according to the
+  provided mime_type, then prints the mime-type and container to
+  stdout. It provides an easy way for servers to respond to clients
+  that use web_rpc_call. Understood types are
+  <i>application/x-www-form-urlencoded</i> and <i>application/json</i>, and if
+  mime_type is NULL, mime_type will default to
+  <i>application/x-www-form-urlencoded</i>.</p>
+
+</div>
+  
+<div class="method_div">
+<h3 class="method">UniversalContainer web_fetch(const char* url)</h3>
+
+  <p><em class="warning">This method requires that LibUC be built with
+  libcurl support.</em></p>
+  
+  <p>Retrieves a set of name/value pairs from a given url, using HTTP
+  get. This method checks the mime-type and uses that to determine how
+  to parse the data. Understood types are
+  <i>application/x-www-form-urlencoded</i> and <i>application/json</i>. Most web
+  documents are not formatted in this fashion, but some software such
+  as couchDB provides data in this fashion.</p>
+
+</div>
+
+</body>
+</html>

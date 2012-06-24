@@ -1,0 +1,235 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>struct Buffer</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>struct Buffer</h1>
+<h2 class="include">#include "buffer.h"</h2>
+
+<h2>Overview</h2>
+
+<p>The Buffer class provides a simple, file like mechanism that
+operates in memory. It is intended to provide a bridge between the
+wide variety of file and file like mechanisms commonly found in C and
+C++ libraries. The class itself provides an in memory buffer for read
+and write operations, and tracks the read and write position
+separately. A write past of the end of currently allocated memory
+results in the available buffer size being doubled. A selection of
+utility functions allows for reading and writing of buffers to sources
+such as system sockets, C files, C++ streams, and CURL handles. In
+most instances, client code will interact with buffers through the
+utility routines, rather than through member functions.</p>
+
+<p>If the member variable own_data is set to false, then the
+buffer can not be grown, and the underlying storage space will
+not be cleaned up when the Buffer is deleted. This allows Buffer
+to be used to wrap storage space that is managed elsewhere, or that
+comes from other similar classes in other libraries. It is also useful
+when Buffer is wrapped around a static string.</p>
+
+<h2>Member Variables</h2>
+<table class="dictionary">
+<tr><th>Variable</th><th>Purpose</th></tr>
+<tr><td>char* data</td><td>Data held in the buffer</td></tr>
+<tr><td>size_t size</td><td>Allocated size of data member</td></tr>
+<tr><td>size_t rpos</td><td>Position of the read head</td></tr>
+<tr><td>size_t wpos</td><td>Position of the write head</td></tr>
+<tr><td>size_t length</td><td>Number of bytes the buffer contains</td></tr>
+<tr><td>bool own_data</td><td>Whether or not this buffer objects owns
+  the underlying data.</td></tr>
+  </table>
+  
+<h2>Constructor</h2>
+<div class="method_div">
+<h3 class="method">Buffer(int sz = 4k)</h3>
+  <p>Creates a new, empty, Buffer class, with an initial internal buffer size of
+  4k.</p>
+  </div>
+
+<div class="method_div">
+<h3 class="method">Buffer(char* str)</h3>
+  <p>Creates a buffer, using the given string as the storage
+  space. The write position is set to the end of the string, and the
+  length is set to strlen(str). The resulting buffer can not be grown,
+  and when it is deleted the string remains.</p>
+  </div>
+
+<div class="method_div">
+<h3 class="method">Buffer(void* d, size_t len)</h3>
+  <p>Creates a buffer, using the given array of bytes as the storage
+  space. The write position is set to len, as is the length of the
+  buffer. The resulting buffer can not be grown,
+  and when it is deleted the string remains.</p>
+  </div>
+  
+<h2>Methods</h2>
+
+<div class="method_div">
+<h3 class="method">bool put_data(const char* data, int length)</h3>
+<p>Copy length bytes from data into the buffer. Updates the read
+  position accordingly, and expands the internal memory buffer as
+  required. Returns true on success and false on failure.</p>
+</div>
+  
+<div class="method_div">
+<h3 class="method">char* fetch_data(size_t len)</h3>
+<p>If there are not at least len bytes from the current read position to the
+  end of buffer this method returns NULL. Otherwise, the read pointer
+  is advanced by len bytes and a pointer to the previous read position
+  is returned. Note that the pointer returned by this routine is the
+  same block the object instance uses to store data, and it is owned
+  by the Buffer instance.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool ensure_space(size_t len)</h3>
+<p>Ensures that the underlying internal buffer has at least len
+  unused bytes. If len bytes are already available, nothing more is
+  done. If len is not available, the buffer is doubled until len bytes
+  are available. Mostly used by the provide write methods, client code
+  will rarely need this method. Returns true on success and false on
+  failure.</p>
+</div>
+  
+<div class="method_div">
+<h3 class="method">size_t copy_out(char* dest, size_t len)</h3>
+<p>This method copies up to len bytes from the current read position
+  to dest. A null-terminator is not written. The number of bytes
+  actually copied is returned.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">char* get_line(void)</h3>
+<p>Reads from the buffer until the end of the buffer or a newline
+  character is found. A null-terminated string is returned. Unlike
+  fetch_data, this returned string is owned by the client and should
+  be deleted (not freed) when the client is finished with it.</p>
+</div>
+  
+  <div class="method_div">
+<h3 class="method">bool end(void) const</h3>
+<p>Returns true is the read pointer has reached the end of the buffer,
+    false otherwise.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">void rewind(void)</h3>
+<p>Rewinds both the read and write positions to the beginning of the
+  buffer. The buffer contents are not affected.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">void clear(void)</h3>
+<p>Clears the buffer, reseting read and write positions, and buffer contents.</p>
+</div>
+	
+<div class="method_div">
+<h3 class="method">bool seek(size_t pos)</h3>
+  <p>Sets both the read and write position to pos.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool put(char datum)</h3>
+<h3 class="method">bool put(unsigned char datum)</h3>
+<h3 class="method">bool put(int datum)</h3>
+<h3 class="method">bool put(long datum)</h3>
+<h3 class="method">bool put(bool datum)</h3>
+<h3 class="method">bool put(double datum)</h3>
+
+  <p>This group of methods writes the given value to the buffer. If
+  necessary the internal buffer is expanded. Returns true on success
+  and false on failure.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">bool fetch(char& retval)</h3>
+<h3 class="method">bool fetch(unsigned char& retval)</h3>
+<h3 class="method">bool fetch(int& retval)</h3>
+<h3 class="method">bool fetch(long& retval)</h3>
+<h3 class="method">bool fetch(bool& retval)</h3>
+<h3 class="method">bool fetch(double& retval)</h3>
+<p>This group of methods reads a value out of the buffer and into the
+  provided variable. Returns true on success and false on failure.</p>
+</div>
+
+<h2>Non-member Utility Functions</h2>
+<div class="method_div">
+<h3 class="method">bool write_from_buffer(Buffer*, ostream& stream)</h3>
+<h3 class="method">bool write_from_buffer(Buffer*, FILE* file)</h3>
+<h3 class="method">bool write_from_buffer(Buffer*, int socket)</h3>
+<h3 class="method">bool write_from_buffer(Buffer*, const char* filename)</h3>
+  <p>These routines send the entire contents of the buffer to the
+  given destination. Note that the version that takes an int works on
+  any file descriptor, not just sockets.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method"> Buffer* read_to_buffer(istream& stream)</h3>
+<h3 class="method"> Buffer* read_to_buffer(FILE* file)</h3>
+<h3 class="method"> Buffer* read_to_buffer(int socket)</h3>
+<h3 class="method"> Buffer* read_to_buffer(const char* filename)</h3>
+<p>These routines read from the given source and place the entire
+  contents, up till end of file, in the buffer. Note that the version
+  that takes an int works on any file descriptor, not just
+  sockets.</p>
+</div>
+
+<div class="method_div"> 
+<h3 class="method"> Buffer* base64_encode(Buffer*)</h3>
+<p>Encode the given buffer into base64 format, and return the
+result. Returns NULL on failure.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method"> Buffer* base64_decode(Buffer*)</h3> 
+<p>Given a buffer containing data encoded in base64 format, this
+routine returns a decoded version of that data. Returns NULL on
+failure.</p>
+</div>
+
+<div class="method_div">
+   <p><em class="warning">This method requires that LibUC be built with
+  libcurl support.</em></p>
+ 
+ <h3 class="method"> Buffer* http_post_buffer(const char* url, Buffer*
+ send, string& mime_type_returned, const char* mime_type_sent = NULL,
+ const int timeout = -1)</h3>
+<p>This function does an HTTP POST request of the buffer send to given
+ url. The mime_type of the resulting response is stored in
+ mime_type_returned. If mime_type_sent is not provided, or is NULL,
+ the HTTP POST request will be made with mime type
+ "application/x-www-form-urlencoded", which is the type used when
+ sending forms from a browser to a web server. Otherwise, the post
+ request will be made using the given mime type. This can be useful
+ when working with RESTful services. The buffer containing the servers
+ response is returned. If timeout is allowed to default, the default
+ timeout provided by the underlying CURL library will be
+ used. Otherwise, timeout provides the timeout for the operation in seconds.</p>
+  </div>
+  
+<div class="method_div">
+<h3 class="method"> Buffer* http_get_buffer(const char* url, string&
+  mime_type, const int timeout = -1)</h3>
+
+  <p><em class="warning">This method requires that LibUC be built with
+  libcurl support.</em></p>
+ 
+  <p>This function sends an HTTP GET to the specified URL, and returns the
+  results in a buffer. The string mime_type is set to the mime_type of
+  the data retrieved. If timeout is allowed to default, the default
+ timeout provided by the underlying CURL library will be
+ used. Otherwise, timeout provides the timeout for the operation in seconds.</p>
+</div>
+
+</body>
+</html>

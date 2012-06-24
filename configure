@@ -1,0 +1,83 @@
+#!/bin/bash
+
+cpu_spec[5]=G4
+cpu_spec[4]=G5
+cpu_spec[3]=PENTIUMPRO
+cpu_spec[2]=PRESCOTT
+cpu_spec[1]=CORE2
+cpu_len=${#cpu_spec[@]}
+
+debug_spec[2]="YES"
+debug_spec[1]="NO"
+
+cpu_name[5]="G4"
+cpu_name[4]="G5"
+cpu_name[3]="PentiumPro Family"
+cpu_name[2]="Pentium 4"
+cpu_name[1]="Core2"
+
+os_name=`uname -s`
+
+echo "Select CPU Family" 
+for (( i=1; i <= $cpu_len; i++)); do
+	echo "$i) ${cpu_name[${i}]}"
+done
+echo
+
+read -p ">" cpu_choice
+echo
+echo "Debugging Build"
+echo "1) No"
+echo "2) Yes"
+echo
+read -p ">" debug_choice
+
+echo "Install Directory"
+read -p "[default: /opt]>" tmp
+if [ "$tmp" = "" ]; then
+	install_dir="/opt"
+else
+	install_dir=$tmp
+fi
+
+echo "Build with MySQL Support"
+echo "1) No"
+echo "2) Yes"
+echo
+read -p ">" mysql_choice
+
+if [ "$mysql_choice" = "2" ]; then
+    mysql=YES
+    mysql_cflags=`mysql_config --include`
+    mysql_libs=`mysql_config --libs`
+else
+    mysql=NO
+fi
+
+echo "Build with SQLite Support"
+echo "1) No"
+echo "2) Yes"
+echo
+read -p ">" sqlite_choice
+
+if [ "$sqlite_choice" = "2" ]; then
+    sqlite=YES
+else
+    sqlite=NO
+fi
+
+echo "Build with CURL Support"
+echo "1) No"
+echo "2) Yes"
+echo
+read -p ">" curl_choice
+
+if [ "$curl_choice" = "2" ]; then
+    curl=YES
+    curl_cflags=`curl-config --cflags`
+    curl_libs=`curl-config --libs`
+else
+    curl=NO
+fi
+  
+printf "CPU=${cpu_spec[${cpu_choice}]}\nDEBUG=${debug_spec[${debug_choice}]}\nOPSYS=${os_name}\nINSTALLDIR=${install_dir}\nSQLITE=${sqlite}\nMYSQL=${mysql}\nMYSQL_CFLAGS=${mysql_cflags}\nMYSQL_LIBS=${mysql_libs}\nCURL=${curl}\nCURL_CFLAGS=${curl_cflags}\nCURL_LIBS=${curl_libs}\n\n">config.inc

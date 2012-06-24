@@ -1,0 +1,421 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+  UniversalContainer library.
+  Copyright Jason Denton, 2008,2010.
+  Made available under the new BSD license.
+ 
+  Send comments and bug reports to jason.denton@gmail.com
+  http://www.greatpanic.com/code.html
+-->
+<html>
+<head>
+<title>UniversalContainer</title>
+<link media="screen" rel="stylesheet" type="text/css" href="proglib.css"/>
+</head>
+<body>
+<h1>class UniversalContainer</h1>
+<h2 class="include">#include "ucontainer.h"</h2>
+
+<h2>Overview</h2>
+
+<p>The UniversalContainer class is an attempt to provide a class which
+can act in a manner similar to the untyped variables, arrays, and
+hash-maps found in popular scripting languages such as perl and PHP.
+The result is a class that can hold a wide variety of data and
+meta-data in a very flexible structure. UniversalContainers can hold
+integers, doubles, booleans, single characters, strings, and wide
+character strings. UniversalContainers may also be used as associative
+maps between strings and other UniversalContainers, or as arrays of
+UniversalContainers.</p>
+
+<p>See an <a href="example.html">example</a>.</p>
+
+<p>To use a UniversalContainer, simply create an instance and assign
+any scalar value to the class. Alternatively, you can use the
+container as an associative map, using the overloaded brackets
+operator to assign a scalar or other UniversalContainer to a string
+based key. If you use the brackets operator with a numerical index,
+the UniversalContainer will act as an array which expands the first
+time you access the first element beyond the end of the list. To
+retrieve a value from a UniversalContainer, simply cast the UC back to
+the desired type. Illegal casts result in a run time exception, but
+every effort is made to make a meaningful cast. For example, you can
+always cast an integer to a string containing the decimal
+representation, and strings which hold the decimal representation of a
+number may be cast to integers; while strings holding other values
+will result in a runtime exception.</p>
+
+<p>The <a href="libuc.html">Libuc library</a> also contains a number
+of useful routines and classes for working with UniversalContainers.
+This includes routines for serialization, database access, CGI
+programming, and REST style remote calls.</p>
+
+<h2>Assignment Operators</h2>
+
+<p>The UniversalContainer class overloads the assignment operator for
+types long, int, double, bool, char, char*, std::string, std::wstring,
+and itself. The first time a value is assigned to a container, the
+container will adopt the appropriate type. Future attempts to assign
+values of different types to a container will result in an
+exception. The exception to this rule is that types int, long, and
+double allow for other numeric values to be assigned, and the
+container will switch to properly reflect its new contents.</p>
+
+<p>Internally, if a UniversalContainer is holding an string, wstring,
+map, or an array, it allocates that appropriate structure on the heap
+and stores a pointer to it. The copy constructor for
+UniversalContainer copies only the pointer, resulting in a shallow
+copy when the UC holds data of these types. This allows for
+UniversalContainers to be passed to and returned from functions
+without excessive overhead, but it also means that UniversalContainers
+holding this type of information are essentially passed by
+reference. The number of UniversalContainers referring to a given
+collection or string is tracked so that memory is not leaked when
+UniversalContainers are copied and destroyed. The clone method can be
+used when a deep copy is needed.</p>
+
+<p>The assignment operator also does assignments for arrays and maps
+by reference, so that if one container is set equal to another, any
+changes to the array or map stored by one are reflected by the
+other. In the event that a UniversalContainer holding a string or
+wstring is assigned to hold another string, the reference count is
+adjusted and the previous string is deleted only if no other
+containers are holding the string.</p>
+
+<h2>Casting Operators</h2>
+
+<p>The UniversalContainer class overloads a number of casting
+operators, allowing instances holding scalars to be used in place of
+scalars of the matching type. Casting an integer or double value to
+another value of those types will result in a result similar to a
+standard cast of the appropriate type. Bools can be cast to chars,
+resulting in either 't' or 'f'. Attempting to cast any scalar to a
+string will result in the appropriate conversion, with booleans
+returning a value of "true" or "false", and null containers return
+"null". Attempting to cast a container to an unsupported type results
+in an exception being thrown. Casting a container does not affected
+the underlying container.</p>
+
+<p>Attempting to cast an array to a boolean will result in the value
+"true" being returned. Attempting to cast a map to a boolean will
+result in the value true, unless the map contains the key
+"#boolean_value". In this case the container will evaluate to the
+value stored in the map with this key. This convention is used by
+various routines in the utility library to signal a failure. The
+#boolean_value key is set to false, and other fields are set to
+describe the failure. This allows the caller of the routine to check
+for success or failure by simply testing true/false on the container,
+and then extracting appropriate information based on the result.</p>
+
+<h2>The Brackets[] Operator</h2>
+
+<p>The brackets operator on the UniversalContainer class has been
+overloaded, allowing the container to act as both an associative map
+and a vector, depending on the key. Using a string within the brackets
+cause the container to act as a map, mapping between the given string
+another UniversalContainer. Numerical indexes cause the container to
+act as zero-based vector. Due to limitations of the underlying
+std::vector template, a new element is created if an attempt to index
+one beyond the current size of the vector is made. Thus, the to create
+an array you should first reference the zeroth element, then the
+first, and so on. Skipping indexes will result in an exception being
+thrown. See the section on <a href="#exceptions">exceptions</a> below
+for details.</p>
+
+<p>Maps and Arrays may nest other maps and arrays, accessed by
+stacking uses of the brackets operator in the same fashion as
+accessing a multidimensional array. Alternatively, a dot notation may
+be used to access nested maps and arrays. For instance, if a container
+<tt>uc</tt> maps the string "foo" to another map, which in term
+contains an element mapped to bar, you can access that element as
+either <tt>uc["foo.bar"]</tt> or <tt>uc[foo][bar]</tt>. Array elements
+may be referenced by numerical index in a similar fashion. For
+instance, if the second element of a vector contains a map with key
+"beta", you could access the value associated with beta with
+<tt>my_uc_array["1.beta"]</tt>.</p>
+
+
+<h2>Constructors</h2>
+<div class="method_div">
+<h3 class="method">UniversalContainer(void)</h3>
+<h3 class="method">UniversalContainer(int)</h3>
+<h3 class="method">UniversalContainer(long)</h3>
+<h3 class="method">UniversalContainer(double)</h3>
+<h3 class="method">UniversalContainer(bool)</h3>
+<h3 class="method">UniversalContainer(char)</h3>
+<h3 class="method">UniversalContainer(const std::string)</h3>
+<h3 class="method">UniversalContainer(const std::string)</h3>
+<h3 class="method">UniversalContainer(char*)</h3>
+<h3 class="method">UniversalContainer(const UniversalContainer&)</h3>
+
+<p>A newly constructed UniversalContainer usually has a null type,
+waiting for a particular value to be assigned to it. Alternatively, it
+may be constructed holding a particular scalar value.</p>
+
+<p>The copy constructor for the UniversalContainer does a shallow
+copy. Strings, maps, and vectors held by the container are held be
+reference, and a copy will point to the same underlying data. This
+increases efficiency when using UniversalContainers in a function call
+or returning then as results. When a deep copy of a UniversalContainer
+is required, use the <tt>clone</tt> method. UniversalContainers
+maintain a shared count of the data objects they point to, and the
+last copy to be destroyed will cleanup the memory used.</p> </div>
+
+<h2>Methods</h2>
+
+<div class="method_div">
+  <h3 class="method">void init_map(void)</h3>
+  <h3 class="method">void init_array(void)</h3>
+  
+  <p>These methods set a null UniversalContainer to be an empty array
+  and an empty map respectively. They are intended to only be called
+  on freshly created containers, to force them to be taken on an
+  identity as arrays or maps respectively; without having to assign a
+  value to them using the [] operator. Useful when you want to return
+  something that is an empty array or empty map.</p>
+</div>
+
+<div class="method_div">
+  <h3 class="method">void string_interpret(const std::string s)</h3>
+  
+  <p>This method is a pseudo-constructor, intended to be invoked on
+  newly created, null valued, UniversalContainers in order to
+  initialize them according to the data type represented by the
+  contents of a string. First, the method attempts to convert the
+  input to a long. If the input can not be converted to a long, it
+  then attempts to convert it to a double. If this also fails, it
+  checks the length of the input. If length is one it stores the
+  single character. If there is more than one character, a case
+  insensitive comparison is then made to the strings "true", "false",
+  and "null". A match results in the appropriate value being
+  set. Otherwise, the input is stored as a string. Attempts to invoke
+  this method on a non-null container will result in an exception of
+  uce_TypeMismatch_Write.</p>
+</div>
+
+<div class="method_div">
+  <h3 class="method">UniversalContainer& added_element(void)</h3>
+  <p>If the container is a vector, appends an element to the end of the
+  vector and returns a reference to it. If the container is not a
+  vector, throws an exception with type uce_Non_Array_as_Array.</p>
+</div>
+
+<div class="method_div">
+    <h3 class="method">UniversalContainer clone(void)</h3>
+
+    <p>Returns a deep copy of the object. By default, the copy constructor
+  for Universal Container returns a shallow copy. See the notes under
+  the copy constructor for details on why this may be important.</p>
+  </div>
+  
+  <div class="method_div">
+    <h3 class="method">void clear(void)</h3>
+    
+    <p>Clears the current container. The containers type is reset to null,
+    allowing it to once again contain any type of data assigned to it. If
+    the container previously contained a string, map, or vector the data
+    object will be deleted if and only if it is no longer referenced by
+    another UniversalContainer.</p> </div>
+    
+<div class="method_div">
+<h3 class="method">bool exists(const std::string key)</h3>
+<p>Return true if the given key exists in the map, return false
+otherwise. If used on a container which is not a map it will return
+false.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">UniversalContainerType get_type(void)</h3>
+<p>Returns the type associated with this particular instance.
+UniversalContainerType is an enumeration, it may take any of the
+following values. <tt>uc_Integer, uc_Boolean, uc_Character, uc_String,
+uc_Real, uc_Null, uc_Array, uc_Map</tt></p>
+</div>
+
+<div class="method_div">
+<h3 class="method">std::vector&lt;std::string&gt; keys_for_map(void)</h3>
+
+  <p>Returns a vector of strings, giving the keys for the map.
+  Otherwise, throws uce_Non_Map_as_Map.</p>
+
+</div>
+
+<div class="method_div">
+<h3 class="method">bool remove(const std::string key)</h3>
+
+  <p>Removes the given key from a map, or throws a uce_Non_Map_as_Map
+exception if used on a container which is not a map.</p> </div>
+
+<div class="method_div">
+<h3 class="method">size_t size(void)</h3>
+<h3 class="method">size_t length(void)</h3>
+  
+  <p>Return the number of keys in the map, or the number of elements
+in the vector, or zero for containers holding atomic types.</p> </div>
+
+<div class="method_div">
+<h3 class="method">const char* c_str(void) const</h3>
+
+  <p>If the UniversalContainer is holding a string, this returns the
+  pointer to the underlying characters just like calling
+  string::c_str. Otherwise, it throws uce_TypeMismatch_Read.</p>
+</div>
+
+<div class="method_div">
+<h3 class="method">UniversalMap::iterator map_begin(void)</h3>
+<h3 class="method">UniversalMap::iterator map_end(void)</h3>
+<h3 class="method">UniversalArray::iterator vector_begin(void)</h3>
+<h3 class="method">UniversalArray::iterator vector_end(void)</h3>
+<h3 class="method">UniversalMap& get_map(void)</h3>
+<h3 class="method">UniversalArray& get_vector(void)</h3>
+
+  <p>When used to store maps and arrays, UniversalContainers do so by
+pointing to UniversalMap and UniversalArray objects, as appropriate.
+These are typedefed as std::map&lt;std::string,UniversalContainer&gt;
+and std::vector&lt;UniversalContainer&gt; respectively. These methods
+return the corresponding iterators, or the underlying object as
+appropriate. These may be useful for using UniversalContainer with
+algorithms from the C++ STL, or otherwise manipulating the structure
+of the map or vector. If used on a container with the inappropriate
+type they will throw an exception.</p> </div>
+
+<div class="method_div">
+<h3 class="method">bool is_dirty(void)</h3>
+<h3 class="method">void clean(void)</h3>
+
+  <p>Each UniversalContainer contains a dirty flag, which indicates if
+  its contents have changed. This flag is set to true when the UC is first
+  constructed, and set reset to true whenever the container takes on a
+  new atomic value. Array type containers have this flag set whenever
+  an element is added. This flag is only cleared when the
+  <tt>clean</tt> method is called.</p>
+  
+  <p>For UCs containing atomic types, <tt>is_dirty</tt> returns true when
+  the flag is set. For arrays and maps, this method returns true when
+  the flag is set or whenever the is_dirty method of one of their
+  component elements returns true.</p>
+
+</div>
+
+<div class="method_div">
+<h3 class="macro">ucexception(int code)</h3>
+<p>This macro takes one of the codes from the table below, and
+  constructs a UniversalContainer representing an exception. The
+  intended use is as part of a throw statement such as : <tt>throw
+  ucexception(uce_Unknown);</tt>. If debugging information is
+  available this UC will contain information about the function, file,
+  and line where it was invoked.</p>
+</div>
+  
+
+<a name="exceptions"/>
+<h2>Exceptions</h2>
+
+<p>Many of the methods and overloaded operators defined by the
+UniversalContainer class can result in an exception being
+thrown. The thrown exceptions are themselves UniversalContainers,
+containing a map with a variety of information. Although these are
+runtime errors, most of the exceptions represent programming
+errors. In most cases, a top level try/catch block which prints the
+exception for debugging purposes is sufficient.</p>
+
+<p>Many of the functions which work with UniversalContainers, such as
+the database routines and the various serialization and
+deserialization routines also throw UniversalContainers as
+exceptions.</p>
+
+
+<h3>Contents of a thrown UniversalContainer</h3>
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Value</th>
+  </tr>
+  <tr>
+    <td class="symbol">code</td>
+    <td class="notes">An integer error code. See the following table.</td>
+  </tr>
+  <tr>
+    <td class="symbol">message</td>
+    <td class="notes">A string describing the error. See the following table.</td>
+  </tr>
+  <tr>
+    <td class="symbol">function</td>
+    <td class="notes">The name of the function which originally threw
+  the exception. Only available if the library was built with
+  debugging information.</td>
+  </tr>
+  <tr>
+    <td class="symbol">file</td>
+    <td class="notes">The name of the file where the exception was thrown. Only available if the library was built with debugging information.</td>
+  </tr>
+  <tr>
+    <td class="symbol">line</td>
+    <td class="notes">The line number that threw the exception. Only available if the library was built with debugging information.</td>
+  </tr>
+  <tr>
+    <td class="symbol">container</td>
+    <td class="notes">A copy of the UniversalContainer that threw the
+  exception. Only available if the exception was thrown from within
+  the UniversalContainer exception itself.</td>
+  </tr>
+</table>
+
+<a name="exceptions"><h3>Error Codes and Messages</h3></a>
+<table>
+  <tr><th>Code</th><th>Message</th></tr>
+  <tr>
+    <td class="symbol">uce_Unknown</td>
+    <td class="notes">Unknown UniversalContainer exception.</td>
+  </tr>
+
+  <tr>
+    <td class="symbol">uce_TypeMismatch_Write</td>
+    <td class="notes">Attempt to assign a variable to a container which already contains a variable of another type.</td>
+  </tr>
+  <tr>
+    <td class="symbol">uce_TypeMismatch_Read</td>
+    <td class="notes">Attempt to cast a variable to an incompatible type.</td>
+  </tr>
+  <tr>
+    <td class="symbol">uce_Collection_as_Scalar</td>
+    <td class="notes">Attempt to treat a collection as a scalar variable.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Scalar_as_Collection</td>
+      <td class="notes">Attempt to treat a scalar variable as a collection.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Non_Map_as_Map</td>
+      <td class="notes">Attempt to treat a non-map container as a map.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Non_Array_as_Array</td>
+      <td class="notes">Attempt to treat a non-array container as an array.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Array_Subscript_Out_of_Bounds</td>
+      <td class="notes">Array subscript out of bounds.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Deserialization_Error</td>
+      <td class="notes">Input is not a valid serialized
+	UniversalContainer.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_Serialization_Error</td>
+      <td class="notes">Unable to serialize containers with elements
+	of an unknown type.</td>
+    </tr> 
+    <tr>
+      <td class="symbol">uce_ContractViolation</td>
+      <td class="notes">The given container does not conform to the contract.</td>
+    </tr>
+    <tr>
+      <td class="symbol">uce_DB_Connection</td>
+      <td class="notes">Error connecting to the database.</td>
+    </tr>  
+  </table>
+
+</body>
+</html>
