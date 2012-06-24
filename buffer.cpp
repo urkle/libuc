@@ -71,12 +71,12 @@ namespace JAD {
 
     size_t nsize = size << 1;
     while (nsize < total_need) nsize <<= 1;
-    char* ndata = (char*) malloc(nsize);
+    char* ndata = new char[nsize];
     if (!ndata) return false;
-    for (size_t i = 0; i < size; i++)
-      ndata[i] = data[i];
+    memcpy((void *)ndata, (void *)data, size);
     delete[] data;
     data = ndata;
+    size = nsize;
     return true;
   }
   
