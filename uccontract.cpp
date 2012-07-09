@@ -8,6 +8,7 @@
  */
 
 #include <string>
+#include <cstring>
 #include "uccontract.h"
 
 namespace JAD {
